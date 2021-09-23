@@ -42,6 +42,9 @@
 #ifdef _ELMO_FOUND_
 #include <elmo_ethercat_sdk/Elmo.hpp>
 #endif
+#ifdef _OPUS_FOUND_
+#include <opus_ethercat_sdk/Opus.hpp>
+#endif
 #ifdef _MAXON_FOUND_
 #include <maxon_epos_ethercat_sdk/Maxon.hpp>
 #endif
@@ -70,7 +73,11 @@ void worker()
 #ifdef _ELMO_FOUND_
     bool elmoEnabledAfterStartup = false;
 #endif
-    // Flag to set the drive state for the elmos on first startup
+    // Flag to set the drive state for the opuss on first startup
+#ifdef _OPUS_FOUND_
+    bool opusEnabledAfterStartup = false;
+#endif
+    // Flag to set the drive state for the maxons on first startup
 #ifdef _MAXON_FOUND_
     bool maxonEnabledAfterStartup = false;
     // bool maxonOperational = false;
@@ -85,7 +92,7 @@ void worker()
     {
         /*
         ** Update each master.
-        ** This sends tha last staged commands and reads the latest readings over EtherCAT.
+        ** This sends the last staged commands and reads the latest readings over EtherCAT.
         ** The StandaloneEnforceRate update mode is used.
         ** This means that average update rate will be close to the target rate (if possible).
          */
@@ -144,7 +151,7 @@ void worker()
                 }
                 else
                 {
-                    MELO_WARN_STREAM("Elmo '" << elmo_slave_ptr->getName() << "': " << elmo_slave_ptr->getReading().getDriveState());
+                    MELO_WARN_STREAM(configurator->get_logger(), "Elmo '" << elmo_slave_ptr->getName() << "': " << elmo_slave_ptr->getReading().getDriveState());
                     //elmo_slave_ptr->setDriveStateViaPdo(elmo::DriveState::OperationEnabled, false);
                 }
                 auto reading = elmo_slave_ptr->getReading();
@@ -152,6 +159,33 @@ void worker()
                 //                 << "velocity: " << reading.getActualVelocity() << " rad/s\n";
 #endif
             }
+            // Opus
+            else if(configurator->getInfoForSlave(slave).type == EthercatDeviceConfigurator::EthercatSlaveType::Opus)
+            {
+#ifdef _OPUS_FOUND_
+                std::shared_ptr<opus::Opus> opus_slave_ptr = std::dynamic_pointer_cast<opus::Opus>(slave);
+                if(!opusEnabledAfterStartup)
+                    // Set opuss to operation enabled state, do not block the call!
+                    opus_slave_ptr->setDriveStateViaPdo(opus::DriveState::OperationEnabled, false);
+                // set commands if we can
+                if(opus_slave_ptr->lastPdoStateChangeSuccessful() && opus_slave_ptr->getReading().getDriveState() == opus::DriveState::OperationEnabled)
+                {
+                    opus::Command command;
+                    command.setTargetVelocity(50);
+                    opus_slave_ptr->stageCommand(command);
+                }
+                else
+                {
+                    MELO_WARN_STREAM(configurator->get_logger(), "Opus '" << opus_slave_ptr->getName() << "': " << opus_slave_ptr->getReading().getDriveState());
+                    //opus_slave_ptr->setDriveStateViaPdo(opus::DriveState::OperationEnabled, false);
+                }
+                auto reading = opus_slave_ptr->getReading();
+                MELO_INFO_STREAM(configurator->get_logger(), "Opus '" << opus_slave_ptr->getName() << "': " << opus_slave_ptr->getReading().getDriveState());
+                // std::cout << "Opus '" << opus_slave_ptr->getName() << "': "
+                //                 << "velocity: " << reading.getActualVelocity() << " rad/s\n";
+#endif
+            }
+
             // Maxon
             else if (configurator->getInfoForSlave(slave).type == EthercatDeviceConfigurator::EthercatSlaveType::Maxon)
             {
@@ -181,7 +215,7 @@ void worker()
                 }
                 else
                 {
-                    MELO_WARN_STREAM("Maxon '" << maxon_slave_ptr->getName()
+                    MELO_WARN_STREAM(configurator->get_logger(), "Maxon '" << maxon_slave_ptr->getName()
                                                                          << "': " << maxon_slave_ptr->getReading().getDriveState());
                 }
 
@@ -194,6 +228,9 @@ void worker()
         counter++;
 #ifdef _ELMO_FOUND_
         elmoEnabledAfterStartup = true;
+#endif
+#ifdef _OPUS_FOUND_
+        opusEnabledAfterStartup = true;
 #endif
 #ifdef _MAXON_FOUND_
         maxonEnabledAfterStartup = true;
@@ -279,7 +316,7 @@ int main(int argc, char**argv)
     /*
     ** Add callbacks to the devices that support them.
     ** If you don't want to use callbacks this part can simply be left out.
-    ** configurator->getSlavesOfType is another way of extracting only the evices
+    ** configurator->getSlavesOfType is another way of extracting only the devices
     ** of a ceratin type.
      */
 #ifdef _ANYDRIVE_FOUND_

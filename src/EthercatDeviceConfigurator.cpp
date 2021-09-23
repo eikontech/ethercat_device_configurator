@@ -24,6 +24,11 @@
 #include "elmo_ethercat_sdk/Elmo.hpp"
 #endif
 
+/*Opus*/
+#ifdef _OPUS_FOUND_
+#include "opus_ethercat_sdk/Opus.hpp"
+#endif
+
 /*Maxon*/
 #ifdef _MAXON_FOUND_
 #include "maxon_epos_ethercat_sdk/Maxon.hpp"
@@ -56,11 +61,12 @@ static bool path_exists(std::string& path)
 
 
 EthercatDeviceConfigurator::EthercatDeviceConfigurator(std::string path, bool startup):
-    m_setup_file_path(path)
+    m_setup_file_path(path),
+    m_logger(rclcpp::get_logger("EthercatDeviceConfigurator"))
 {
     parseFile(m_setup_file_path);
     setup(startup);
-    MELO_DEBUG("[EthercatDeviceConfigurator] Parsing and setup finished");
+    MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "] Parsing and setup finished");
 }
 
 std::vector<std::shared_ptr<ecat_master::EthercatMaster> > EthercatDeviceConfigurator::getMasters()
@@ -161,6 +167,10 @@ void EthercatDeviceConfigurator::parseFile(std::string path)
                 {
                     entry.type = EthercatSlaveType::Elmo;
                 }
+                else if(type_str == "Opus")
+                {
+                    entry.type = EthercatSlaveType::Opus;
+                }
                 else if(type_str == "Maxon")
                 {
                     entry.type = EthercatSlaveType::Maxon;
@@ -251,7 +261,7 @@ void EthercatDeviceConfigurator::setup(bool startup)
 {
     for(auto & entry: m_slave_entries)
     {
-        MELO_DEBUG_STREAM("[EthercatDeviceConfigurator] Creating slave: " << entry.name);
+        MELO_DEBUG_STREAM(m_logger, "[EthercatDeviceConfigurator] Creating slave: " << entry.name);
 
         std::shared_ptr<ecat_master::EthercatDevice> slave = nullptr;
 
@@ -263,6 +273,19 @@ void EthercatDeviceConfigurator::setup(bool startup)
             slave = elmo::Elmo::deviceFromFile(configuration_file_path, entry.name, entry.ethercat_address);
 #else
             throw std::runtime_error("elmo_ethercat_sdk not availabe.");
+#endif
+
+        }
+            break;
+        case EthercatSlaveType::Opus:
+        {
+#ifdef _OPUS_FOUND_
+            std::string configuration_file_path = handleFilePath(entry.config_file_path,m_setup_file_path);
+            MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "]" << "Create Opus device from file: " << configuration_file_path);
+            slave = opus::Opus::deviceFromFile(configuration_file_path, entry.name, entry.ethercat_address);
+            MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "]" << " Opus device created!");
+#else
+            throw std::runtime_error("opus_ethercat_sdk not availabe.");
 #endif
 
         }
@@ -412,7 +435,7 @@ void EthercatDeviceConfigurator::setup(bool startup)
     {
         for(auto & master: m_masters)
         {
-            MELO_DEBUG("Starting master on: " + master->getConfiguration().networkInterface)
+            MELO_DEBUG(m_logger, "Starting master on: " + master->getConfiguration().networkInterface)
             if(!master->startup())
             {
                 throw std::runtime_error("[EthercatDeviceConfigurator] could not start master on interface: " + master->getConfiguration().networkInterface);

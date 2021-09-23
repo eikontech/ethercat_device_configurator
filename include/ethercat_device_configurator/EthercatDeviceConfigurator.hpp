@@ -19,6 +19,9 @@
 #include <ethercat_sdk_master/EthercatMaster.hpp>
 #include <type_traits>
 
+// ros2
+#include <rclcpp/logger.hpp>
+
 class EthercatDeviceConfigurator
 {
 public:
@@ -29,6 +32,7 @@ public:
     enum class EthercatSlaveType
     {
         Elmo,
+        Opus,
         Maxon,
         Anydrive,
         Rokubi,
@@ -107,6 +111,8 @@ public:
         return slaves;
     }
 
+    rclcpp::Logger get_logger() const {return m_logger;}
+
 private:
     //Stores the general master configuration.
     //If slaves on multiple bus interfaces are detected, the bus interface in this object will be the interface of the last configured interface
@@ -144,4 +150,7 @@ private:
 
     //Path to the setup file
     std::string m_setup_file_path ="";
+
+    //! Logger
+    rclcpp::Logger m_logger;
 };
