@@ -281,9 +281,9 @@ void EthercatDeviceConfigurator::setup(bool startup)
         {
 #ifdef _OPUS_FOUND_
             std::string configuration_file_path = handleFilePath(entry.config_file_path,m_setup_file_path);
-            MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "]" << "Create Opus device from file: " << configuration_file_path);
+            MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "] Create Opus device from file: " << configuration_file_path);
             slave = opus::Opus::deviceFromFile(configuration_file_path, entry.name, entry.ethercat_address);
-            MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "]" << " Opus device created!");
+            MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "] Opus device created!");
 #else
             throw std::runtime_error("opus_ethercat_sdk not availabe.");
 #endif
@@ -442,9 +442,6 @@ void EthercatDeviceConfigurator::setup(bool startup)
             }
         }
     }
-
-
-
 }
 
 std::string EthercatDeviceConfigurator::handleFilePath(const std::string &path, const std::string &setup_file_path) const

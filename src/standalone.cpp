@@ -98,7 +98,7 @@ void worker()
          */
         for(const auto & master: configurator->getMasters() )
         {
-            master->update(ecat_master::UpdateMode::StandaloneEnforceRate); // TODO fix the rate compensation (Elmo reliability problem)!!
+            master->update(ecat_master::UpdateMode::StandaloneEnforceRate); // TODO fix the rate compensation (Opus reliability problem)!!
         }
 
         /*
@@ -165,14 +165,31 @@ void worker()
 #ifdef _OPUS_FOUND_
                 std::shared_ptr<opus::Opus> opus_slave_ptr = std::dynamic_pointer_cast<opus::Opus>(slave);
                 if(!opusEnabledAfterStartup)
-                    // Set opuss to operation enabled state, do not block the call!
+                    // Set opus to operation enabled state, do not block the call!
                     opus_slave_ptr->setDriveStateViaPdo(opus::DriveState::OperationEnabled, false);
+
+                if(opus_slave_ptr->getReading().hasUnreadError())
+                {
+                    auto l_last_error = opus_slave_ptr->getReading().getLastError();
+                    MELO_INFO_STREAM(configurator->get_logger(), "Opus '" << opus_slave_ptr->getName() << "' error: " << static_cast<int>(l_last_error));
+                }
+
+                if(opus_slave_ptr->getReading().hasUnreadFault())
+                {
+                    auto l_last_fault = opus_slave_ptr->getReading().getLastFault();
+                    MELO_INFO_STREAM(configurator->get_logger(), "Opus '" << opus_slave_ptr->getName() << "' fault: " << static_cast<int>(l_last_fault));
+                }
+
+
                 // set commands if we can
                 if(opus_slave_ptr->lastPdoStateChangeSuccessful() && opus_slave_ptr->getReading().getDriveState() == opus::DriveState::OperationEnabled)
                 {
                     opus::Command command;
-                    command.setTargetVelocity(50);
+                    // command.setTargetVelocity(5000);MELO_INFO_STREAM(configurator->get_logger(), "Set target Velocity:\n" << command);
+                    command.setTargetTorque(200);MELO_INFO_STREAM(configurator->get_logger(), "Set target Torque:\n" << command);
                     opus_slave_ptr->stageCommand(command);
+    
+                    // MELO_INFO_STREAM(configurator->get_logger(), "Opus '" << opus_slave_ptr->getName() << "': " << opus_slave_ptr->getReading().getDriveState());
                 }
                 else
                 {
@@ -180,7 +197,6 @@ void worker()
                     //opus_slave_ptr->setDriveStateViaPdo(opus::DriveState::OperationEnabled, false);
                 }
                 auto reading = opus_slave_ptr->getReading();
-                MELO_INFO_STREAM(configurator->get_logger(), "Opus '" << opus_slave_ptr->getName() << "': " << opus_slave_ptr->getReading().getDriveState());
                 // std::cout << "Opus '" << opus_slave_ptr->getName() << "': "
                 //                 << "velocity: " << reading.getActualVelocity() << " rad/s\n";
 #endif
@@ -231,6 +247,8 @@ void worker()
 #endif
 #ifdef _OPUS_FOUND_
         opusEnabledAfterStartup = true;
+        if(opusEnabledAfterStartup)
+            MELO_DEBUG_STREAM(configurator->get_logger(), "Opus Enable");
 #endif
 #ifdef _MAXON_FOUND_
         maxonEnabledAfterStartup = true;
@@ -347,6 +365,8 @@ int main(int argc, char**argv)
         }
     }
 
+    MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "] Run Worker Thread!");
+
     // Start the PDO loop in a new thread.
     worker_thread = std::make_unique<std::thread>(&worker);
 
@@ -354,11 +374,13 @@ int main(int argc, char**argv)
     ** Wait for a few PDO cycles to pass.
     ** Set anydrives into to ControlOp state (internal state machine, not EtherCAT states)
      */
+
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     for(auto & slave: configurator->getSlaves())
     {
         std::cout << " " << slave->getName() << ": " << slave->getAddress() << std::endl;
 #ifdef _ANYDRIVE_FOUND_
+        MELO_DEBUG_STREAM(m_logger, "[" << __FUNCTION__ << "] Operate only on ANYDRIVE!");
         if(configurator->getInfoForSlave(slave).type == EthercatDeviceConfigurator::EthercatSlaveType::Anydrive)
         {
             // Downcasting using shared pointers

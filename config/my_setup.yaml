@@ -1,10 +1,10 @@
 ethercat_master:
-  time_step:                          0.0025
-  update_rate_too_low_warn_threshold: 50
+  time_step:                          0.004
+  update_rate_too_low_warn_threshold: 10
 
 ethercat_devices:
   - type:               Opus
-    name:               OpusTwitter_1
+    name:               ZeroErr Driver
     configuration_file: device_configurations/opus.yaml
     ethercat_bus:       enp4s0
     ethercat_address:   1

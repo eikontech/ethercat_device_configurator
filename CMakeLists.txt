@@ -111,8 +111,12 @@ install(TARGETS ${PROJECT_NAME} standalone
   DESTINATION lib
   RUNTIME
   DESTINATION lib/${PROJECT_NAME})
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME})
+
+  install(DIRECTORY include/${PROJECT_NAME}/
+          DESTINATION include/${PROJECT_NAME})
+
+# install(DIRECTORY example_config/ DESTINATION share/${PROJECT_NAME}/example_config/)
+install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME}/)
 
 ament_export_dependencies(ament_cmake)
 ament_export_include_directories(${INCLUDE_DIRS})

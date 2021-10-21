@@ -20,8 +20,8 @@ Hardware:
   position_encoder_resolution:                    66 # Encoder 'ticks' per encoder revolution
   gear_ratio:                                     [1,1] # [input revolutions, output revolutions]
   motor_constant:                                 1.0
-  max_current:                                    5.0
-  motor_rated_current:                            1.0
+  max_current:                                    11.0
+  motor_rated_current:                            3.3
   direction:                                      1
 # direction :                                     -1
   encoder_position:                               motor
