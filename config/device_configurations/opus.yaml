@@ -15,13 +15,13 @@ Reading:
 Hardware:
   rx_pdo_type:                                    "RxPdoStandard"
   tx_pdo_type:                                    "TxPdoStandard"
-  mode_of_operation:                              "CyclicSynchronousTorqueMode"
+  mode_of_operation:                              "CyclicSynchronousVelocityMode"
   use_multiple_modes_of_operation:                true
-  position_encoder_resolution:                    66 # Encoder 'ticks' per encoder revolution
+  position_encoder_resolution:                    506000 # Encoder 'ticks' per encoder revolution
   gear_ratio:                                     [1,1] # [input revolutions, output revolutions]
   motor_constant:                                 1.0
-  max_current:                                    11.0
-  motor_rated_current:                            3.3
+  max_current:                                    2.0
+  motor_rated_current:                            6.0
   direction:                                      1
 # direction :                                     -1
   encoder_position:                               motor
@@ -54,7 +54,7 @@ Hardware:
 
 #   Either 1 or -1, for positive and negative direction respectively. The
 #   ’positive’ direction is defined by the hardware configuration of the
-#   Opus (EASII gui).
+#   Opus.
 
 
 # encoder_position:
@@ -75,9 +75,8 @@ Hardware:
 
 #   Note: All commands / readings are always in joint space (if the gear
 #   ratio is set correctly). A correct configuration of the Opus drives
-#   over the EASII gui is required in order for the torque / current
-#   /velocity readings and commands to have the correct magnitude and
-#   sign.
+#   is required in order for the torque / current / velocity readings and 
+#   commands to have the correct magnitude and sign.
 
 
 # use_multiple_modes_of_operation:
