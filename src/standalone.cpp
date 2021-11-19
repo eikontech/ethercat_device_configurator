@@ -181,9 +181,9 @@ void worker()
     bool rtSuccess = true;
     for (const auto &master : configurator->getMasters())
     {
-        rtSuccess &= master->setRealtimePriority(99);
+        rtSuccess &= master->setRealtimePriority(99, 1);
     }
-    std::cout << "Setting RT Priority: " << (rtSuccess ? "successful." : "not successful. Check user privileges.") << std::endl;
+    std::cout << "Setting RT Priority (attached to core 1): " << (rtSuccess ? "successful." : "not successful. Check user privileges.") << std::endl;
 
     bool blink = false;
     double error_cumulative = 0;
