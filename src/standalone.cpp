@@ -202,7 +202,6 @@ void worker()
     // Flag to set the drive state for the maxons on first startup
 #ifdef _MAXON_FOUND_
     bool maxonEnabledAfterStartup = false;
-    // bool maxonOperational = false;
 #endif
     /*
     ** The communication update loop.
