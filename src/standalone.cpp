@@ -304,17 +304,17 @@ void worker()
                     MELO_INFO_STREAM(rclcpp::get_logger("standalone"), "Opus '" << slave_ptr->getName() << "' fault: " << static_cast<int>(l_last));
                 }
 
-                if (counter % 100000 == 0)
+                if (counter % 10000 == 0)
                     blink = !blink;
-                double factor = blink ? -1. : 1.;
+                double factor = blink ? -1. : 0.;
                 double velocity_rads = 0.05;
                 double max_velocity_rads = 0.5;
-                double desired_position_rad = 6.28 * factor;
+                double desired_position_rad = 1.57 * factor;
 
                 if (1)
                 {
                     double error = desired_position_rad - slave_ptr->getReading().getActualPosition();
-                    if (fabs(error) < 0.01)
+                    if (fabs(error) < 0.0000001)
                     {
                         error_cumulative = 0;
                         velocity_rads = 0;
@@ -332,7 +332,7 @@ void worker()
                 if (slave_ptr->lastPdoStateChangeSuccessful() && slave_ptr->getReading().getDriveState() == opus::DriveState::OperationEnabled)
                 {
                     opus::Command command;
-                    if (0)
+                    if (1)
                     {
                         command.setTargetVelocity(velocity_rads);
                         MELO_INFO_STREAM(rclcpp::get_logger("standalone"), "Set target Velocity:\n"

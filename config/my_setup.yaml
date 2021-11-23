@@ -4,7 +4,12 @@ ethercat_master:
 
 ethercat_devices:
   - type:               Opus
-    name:               ZeroErr Driver
+    name:               ZeroErr Driver1
     configuration_file: device_configurations/opus.yaml
     ethercat_bus:       enp2s0
     ethercat_address:   1
+  - type:               Opus
+    name:               ZeroErr Driver2
+    configuration_file: device_configurations/opus.yaml
+    ethercat_bus:       enp2s0
+    ethercat_address:   2
