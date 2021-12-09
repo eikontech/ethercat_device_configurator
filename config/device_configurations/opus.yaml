@@ -7,7 +7,7 @@ Opus:
   min_number_of_successful_target_state_readings: 50
 
 Reading:
-  force_append_equal_error:                       true
+  force_append_equal_error:                       false
   force_append_equal_fault:                       false
   error_storage_capacity:                         100
   fault_storage_capacity:                         100
@@ -17,15 +17,30 @@ Hardware:
   tx_pdo_type:                                    "TxPdoStandard"
   mode_of_operation:                              "CyclicSynchronousVelocityMode"
   use_multiple_modes_of_operation:                true
-  position_encoder_resolution:                    506000 # Encoder 'ticks' per encoder revolution
+  position_encoder_resolution:                    524288 # Encoder 'ticks' per encoder revolution
   gear_ratio:                                     [1,1] # [input revolutions, output revolutions]
   motor_constant:                                 1.0
-  max_current:                                    2.0
-  motor_rated_current:                            6.0
-  direction:                                      1
-# direction :                                     -1
-  encoder_position:                               motor
-# encoder_position:                               joint
+  max_current_A:                                  11.
+  max_torque_Nm:                                  10.
+  motor_rated_current_A:                          6.
+  direction:                                      1 # or -1
+  encoder_position:                               motor # or joint
+  
+  position_limit_cnt:                             2147483647 # Encoder 'ticks'
+  velocity_limit_cnt_sec:                         314572 # Encoder 'ticks' per second
+  acceleration_limit_cnt_sec2:                    262144 # Encoder 'ticks' per second per second
+  
+  initial_position_rad:                           1
+  velocity_profile_rad_sec:                       0.5
+  
+  current_p_gain:                                 0
+  current_i_gain:                                 0
+  position_p_gain:                                0.072
+  position_i_gain:                                0.008
+  velocity_p_gain:                                0.216
+  velocity_i_gain:                                0.008
+  torque_p_gain:                                  0.5
+  torque_i_gain:                                  0.01
 
 # Explanation for some **Hardware** parameters
 # ════════════════════════════════════════════
