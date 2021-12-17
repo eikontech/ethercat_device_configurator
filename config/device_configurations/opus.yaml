@@ -30,9 +30,13 @@ Hardware:
   velocity_limit_cnt_sec:                         314572 # Encoder 'ticks' per second
   acceleration_limit_cnt_sec2:                    262144 # Encoder 'ticks' per second per second
   
+  position_offset_cnt:                            -37000 # Encoder 'ticks'
+  velocity_offset_cnt:                            0 # Encoder 'ticks' per second
+  torque_offset_cnt:                              0 # Encoder 'ticks' per second^2
+  
   initial_position_rad:                           1
   velocity_profile_rad_sec:                       0.5
-  
+
   current_p_gain:                                 0
   current_i_gain:                                 0
   position_p_gain:                                0.072
