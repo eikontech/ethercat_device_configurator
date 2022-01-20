@@ -90,7 +90,7 @@ add_library(${PROJECT_NAME} ${SRC_FILES})
 
 target_link_libraries(${PROJECT_NAME} ${anydrive_LIBRARIES}
   ${opus_ethercat_sdk_LIBRARIES} ${elmo_ethercat_sdk_LIBRARIES} ${maxon_epos_ethercat_sdk_LIBRARIES}
-  ${rokubimini_rsl_ethercat_LIBRARIES} ${YAML_CPP_LIBRARIES} stdc++fs)
+  ${rokubimini_rsl_ethercat_LIBRARIES} stdc++fs ${YAML_CPP_LIBRARIES})
 
 add_executable(standalone src/standalone.cpp)
 ament_target_dependencies(standalone ethercat_sdk_master rclcpp)
@@ -102,8 +102,8 @@ add_dependencies(standalone ${PROJECT_NAME} ${anydrive_EXPORTED_TARGETS}
 target_link_libraries(standalone ${PROJECT_NAME}
   ${anydrive_LIBRARIES}
   ${opus_ethercat_sdk_LIBRARIES} ${elmo_ethercat_sdk_LIBRARIES} ${maxon_epos_ethercat_sdk_LIBRARIES}
-  ${rokubimini_rsl_ethercat_LIBRARIES} ${YAML_CPP_LIBRARIES} -pthread stdc++fs)
-
+  ${rokubimini_rsl_ethercat_LIBRARIES} -pthread stdc++fs ${YAML_CPP_LIBRARIES} yaml-cpp)
+  
 install(TARGETS ${PROJECT_NAME} standalone
   ARCHIVE
   DESTINATION lib
